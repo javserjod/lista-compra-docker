@@ -1,0 +1,23 @@
+services:     # servicios que componen el stack o escenario
+
+  # Servicio 1: Aplicación (Frontend + Lógica de negocio)
+  lista_compra_app:
+    image: python:3.9-slim                # plantilla a descargar de Docker Hub: Python versión ligera
+    container_name: contenedor_lista_compra     # nombre de contenedor de aplicación cuando se cree
+    volumes:
+      - .:/app            # crea carpeta en contenedor e introduce archivos
+    working_dir: /app     # cambio de directorio a carpeta creada en línea previa
+    ports:
+      - "8501:8501"       # conexión túnel entre puerto PC y puerto contenedor
+    command:  # instrucciones de arranque: instalación de dependencias y ejecución de aplicación Streamlit
+      sh -c "pip install -r requirements.txt && streamlit run app.py"   
+    depends_on:           # esperar hasta la disponibilidad de dependencias antes de iniciar
+      - redis_db          # única dependencia es contenedor de datos Redis
+
+  # Servicio 2: Imagen de Docker Hub (Persistencia)
+  redis_db:
+    image: "redis:alpine"                # plantilla a descargar de Docker Hub: Redis versión ligera
+    container_name: base_datos_compra    # nombre del contenedor de datos cuando se cree
+    restart: always                      # reinicio de contenedor en caso de desconexión
+
+
